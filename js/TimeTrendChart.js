@@ -351,8 +351,8 @@ class TimeTrendChart {
             const deltaTime = currentTime - this.lastUpdateTime;
             this.lastUpdateTime = currentTime;
             
-            // Calculate time increment based on desired duration (10 seconds for full cycle)
-            const targetDuration = 10000; // 10 seconds in milliseconds
+            // Calculate time increment based on desired duration (30 seconds for full cycle)
+            const targetDuration = 50000; // 30 seconds in milliseconds
             const increment = (deltaTime / targetDuration) * 100;
             
             this.currentTime += increment;
