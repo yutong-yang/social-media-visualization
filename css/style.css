@@ -28,7 +28,44 @@ header {
 .header-content {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 15px;
+}
+
+.logo-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-content .logo {
+    margin-right: 0;
+}
+
+.header-content h1 {
+    margin: 0;
+    flex: 1;
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-link {
+    padding: 8px 16px;
+    background: white;
+    color: #555;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: #99999937;
+    transform: translateY(-1px);
 }
 
 .logo {

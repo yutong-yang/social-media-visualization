@@ -56,7 +56,7 @@ class SocialMediaVisualization {
         try {
             const [pathsResponse, postsResponse, usersResponse] = await Promise.all([
                 fetch('data/4-1data/paths_data.json'),
-                fetch('data/4-1data/posts.json'),
+                fetch('data/4-1data/post.json'),
                 fetch('data/4-1data/user.csv')
             ]);
             

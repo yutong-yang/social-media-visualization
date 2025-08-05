@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Information Propagation Analysis</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/dataMapping.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-title">
+                    <img src="image/logo.svg" alt="Logo" class="logo">
+                    <h1>社交媒体信息传播数据</h1>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html" class="nav-link">🏠 主页</a>
+                    <a href="network_visualization.html" class="nav-link">🕸️ 网络分析</a>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="visualization-container">
+                        <div id="main-visualization">
+                            <div class="legend">
+                                <h3>图例</h3>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #AC6158;"></span>
+                                    <span>DY (抖音)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #3E5555;"></span>
+                                    <span>XHS (小红书)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #C3AB32;"></span>
+                                    <span>WYXW (微信公众号)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #AD748C;"></span>
+                                    <span>JRTT (今日头条)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background-color: #E17D66;"></span>
+                                    <span>VX (微信)</span>
+                                </div>
+                            </div>
+                            <div class="info-box">
+                                <div>• 总帖子数: 112</div>
+                                <div>• 可见帖子数: 78</div>
+                                <div>• 当前时间: 2024/6/20</div>
+                                <div>• 主题: 全部</div>
+                                <div>• 平台: 全部</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="time-trend-container">
+                        <div class="auxiliary-panel">
+                            <div id="time-trend-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <div class="auxiliary-views">
+                        <div class="auxiliary-panel">
+                            <div id="platform-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel">
+                            <div id="content-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel">
+                            <div id="event-subjects-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel">
+                            <div id="post-positions-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel">
+                            <div id="emotion-types-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel">
+                            <div id="user-types-chart"></div>
+                        </div>
+                        <div class="auxiliary-panel" style="grid-column: span 2;">
+                            <div id="geographic-chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/main.js"></script>
+    <script src="js/PlatformChart.js"></script>
+    <script src="js/TimeTrendChart.js"></script>
+    <script src="js/ContentChart.js"></script>
+    <script src="js/EventSubjectsChart.js"></script>
+    <script src="js/PostPositionsChart.js"></script>
+    <script src="js/EmotionTypesChart.js"></script>
+    <script src="js/UserTypesChart.js"></script>
+    <script src="js/GeographicChart.js"></script>
+</body>
+</html>

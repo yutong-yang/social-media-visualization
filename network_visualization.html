@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社交媒体传播网络可视化</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .controls-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .control-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+        
+        .control-btn.active {
+            background: #2196F3;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-controls input, .filter-controls select {
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .filter-controls label {
+            font-size: 12px;
+            color: #555;
+        }
+        
+
+        
+        .legend {
+            margin-top: 15px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .legend-line {
+            display: inline-block;
+            width: 20px;
+            height: 2px;
+            margin-right: 5px;
+        }
+        
+        #network-container {
+            width: 100%;
+            height: 700px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            position: relative;
+            background: #fafafa;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .performance-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 1000;
+        }
+        
+        .evolution-tree {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .tree-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tree-node:hover {
+            transform: scale(1.5);
+        }
+        
+
+        
+        .tree-link {
+            position: absolute;
+            background: #ccc;
+            height: 1px;
+            transform-origin: left center;
+        }
+        
+        .tree-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .time-arrow {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: #666;
+            z-index: 100;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 14px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .control-group h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .query-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .query-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .query-btn {
+            padding: 6px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .query-btn:hover {
+            background: #45a049;
+        }
+        
+        .query-results {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-radius: 4px;
+            padding: 8px;
+        }
+        
+        .query-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .query-result {
+            background: white;
+            padding: 6px;
+            margin-bottom: 4px;
+            border-radius: 3px;
+            border-left: 3px solid #4CAF50;
+            font-size: 11px;
+        }
+        
+        .query-result strong {
+            color: #333;
+        }
+        
+        .query-result small {
+            color: #666;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: white;
+            color: #555;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            /* border: 1px solid #6aaeae5b; */
+        }
+
+        .nav-link:hover {
+            background: #99999937;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="background: #f8f9fa; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="margin: 0; color: #333;">社交媒体传播网络可视化</h1>
+            <nav style="display: flex; gap: 15px;">
+                 <a href="index.html" class="nav-link">🏠 主页</a>
+                <a href="data_visualization.html" class="nav-link">📈 数据分析</a>
+            </nav>
+        </header>
+        
+        <!-- 控制面板 -->
+        <div class="controls-panel">
+            <!-- 视图类型 -->
+            <div class="control-group">
+                <h4>视图类型</h4>
+                <button class="control-btn active" onclick="showView('all')">全部</button>
+                <button class="control-btn" onclick="showView('user-post')">用户-帖子</button>
+                <button class="control-btn" onclick="showView('post-platform')">帖子-平台</button>
+                <button class="control-btn" onclick="showView('post-spread')">传播关系</button>
+            </div>
+            
+            <!-- 知识图谱查询 -->
+            <div class="control-group">
+                <h4>知识图谱查询</h4>
+                <div class="query-section">
+                    <input type="text" id="query-input" placeholder="输入节点ID或关键词..." class="query-input">
+                    <button onclick="searchNode()" class="query-btn">搜索节点</button>
+                    <button onclick="findPath()" class="query-btn">查找路径</button>
+                    <button onclick="findInfluencers()" class="query-btn">查找影响力</button>
+                </div>
+                <div id="query-results" class="query-results"></div>
+            </div>
+            
+            <!-- 传播强度过滤 -->
+            <div class="control-group">
+                <h4>传播强度过滤</h4>
+                <input type="range" id="weight-slider" min="0" max="0.22" step="0.01" value="0" class="slider">
+                <span id="weight-value">0.00</span>
+            </div>
+            
+            <!-- 节点类型过滤 -->
+            <div class="control-group">
+                <h4>节点类型过滤</h4>
+                <label><input type="checkbox" id="show-users" checked> 用户</label>
+                <label><input type="checkbox" id="show-posts" checked> 帖子</label>
+                <label><input type="checkbox" id="show-platforms" checked> 平台</label>
+            </div>
+            
+            <!-- 显示选项 -->
+            <div class="control-group">
+                <h4>显示选项</h4>
+                <label><input type="checkbox" id="show-labels"> 显示标签</label>
+                <label><input type="checkbox" id="show-weights"> 显示权重</label>
+            </div>
+            
+            <!-- 布局控制 -->
+            <div class="control-group">
+                <h4>布局控制</h4>
+                <button onclick="resetLayout()" class="control-btn">重置布局</button>
+                <button id="pause-btn" onclick="toggleSimulation()" class="control-btn">暂停</button>
+            </div>
+            
+            <!-- 数据过滤 -->
+            <div class="control-group">
+                <h4>数据过滤</h4>
+                <label><input type="checkbox" id="enable-path-filter" checked> 启用路径过滤</label>
+                <button onclick="togglePathFilter()" class="control-btn">切换过滤</button>
+            </div>
+            
+            <!-- 网络信息 -->
+            <div class="control-group">
+                <h4>网络信息</h4>
+                <div id="network-info" style="font-size: 11px; line-height: 1.3; color: #666;">
+                    <div>节点数: <span id="node-count">-</span></div>
+                    <div>边数: <span id="edge-count">-</span></div>
+                    <div>当前视图: <span id="current-view">-</span></div>
+                    <div>用户节点: <span id="user-count">-</span></div>
+                    <div>帖文节点: <span id="post-count">-</span></div>
+                    <div>平台节点: <span id="platform-count">-</span></div>
+                    <div>传播强度阈值: <span id="threshold-display">0.000</span></div>
+                </div>
+            </div>
+            
+            <!-- 聚合模式 -->
+            <!-- <div class="control-group">
+                <h4>聚合模式</h4>
+                <button class="control-btn active" onclick="setAggregationMode('none')">无聚合</button>
+                <button class="control-btn" onclick="setAggregationMode('community')">社区聚合</button>
+                <button class="control-btn" onclick="setAggregationMode('platform')">平台聚合</button>
+                <button class="control-btn" onclick="setAggregationMode('user')">用户聚合</button>
+                <button class="control-btn" onclick="setAggregationMode('simple')">简单聚合</button>
+            </div> -->
+        </div>
+        
+        <div style="display: flex; gap: 20px;">
+            <div id="network-container" style="flex: 2;">
+                <div class="loading">加载中...</div>
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div id="evolution-tree-container" style="flex: 1; height: 600px; border: 0px solid #ddd; border-radius: 5px; position: relative;">
+                    <div class="loading">加载演化树...</div>
+                </div>
+                <div id="topic-legend" style="height: 30px; display: flex; align-items: center; justify-content: center; gap: 15px; background: #f0f0f0; border: 1px solid #ddd; border-top: none; font-size: 11px;">
+                    <!-- 话题图例将通过JavaScript动态生成 -->
+                </div>
+                <div id="platform-legend" style="height: 50px; display: flex; align-items: center; justify-content: center; gap: 20px; background: #f8f9fa; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px;">
+                    <!-- 平台图例将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-color" style="background: #ff6b6b;"></span>
+                用户节点
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #4ecdc4;"></span>
+                帖文节点
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background: #45b7d1;"></span>
+                平台节点
+            </div>
+            <div class="legend-item">
+                <span class="legend-line" style="background: #ff6b6b;"></span>
+                用户-帖文关系
+            </div>
+            <div class="legend-item">
+                <span class="legend-line" style="background: #45b7d1;"></span>
+                帖文-平台关系
+            </div>
+            <div class="legend-item">
+                <span class="legend-line" style="background: #96ceb4;"></span>
+                传播关系
+            </div>
+        </div>
+        
+
+        
+        <div class="performance-info" id="performance-info">
+            性能信息
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let networkData = null;
+        let simulation = null;
+        let svg = null;
+        let currentView = 'all';
+        let allNodes = [];
+        let allLinks = [];
+        let filteredNodes = [];
+        let filteredLinks = [];
+        let tooltip = null;
+        let isSimulationRunning = true;
+        
+        // 演化树相关变量
+        let evolutionData = null;
+        let treeContainer = null;
+        let treeTooltip = null;
+        
+        // 过滤设置
+        let weightThreshold = 0;
+        let showUsers = true;
+        let showPosts = true;
+        let showPlatforms = true;
+        let showLabels = false;
+        let showWeights = false;
+        
+        // 聚合设置
+        // let aggregationMode = 'none'; // 'none', 'community', 'platform', 'user'
+        // let aggregatedNodes = new Map();
+        // let aggregatedLinks = [];
+        
+        // 加载数据
+        async function loadData() {
+            try {
+                // 首先加载路径数据
+                const pathsResponse = await fetch('./data/4-1data/paths_data.json');
+                const pathsData = await pathsResponse.json();
+                console.log('路径数据加载成功:', pathsData);
+                
+                // 提取所有路径中的帖文ID
+                const pathPostIds = new Set();
+                pathsData.forEach(path => {
+                    if (path.路径 && Array.isArray(path.路径)) {
+                        path.路径.forEach(post => {
+                            if (post.帖文ID) {
+                                pathPostIds.add(post.帖文ID);
+                            }
+                        });
+                    }
+                });
+                
+                console.log('从路径数据中提取的帖文ID数量:', pathPostIds.size);
+                console.log('路径帖文ID示例:', Array.from(pathPostIds).slice(0, 5));
+                
+                // 保存到全局变量
+                window.pathPostIds = pathPostIds;
+                
+                // 初始化演化树
+                initializeEvolutionTree();
+                
+                // 处理演化数据
+                evolutionData = processEvolutionData(pathsData);
+                console.log('演化数据处理完成:', {
+                    totalPosts: evolutionData.posts.length,
+                    totalTopics: evolutionData.topics.size
+                });
+                
+                // 绘制演化树
+                drawEvolutionTree(evolutionData);
+                
+                // 生成话题图例
+                generateTopicLegend(evolutionData);
+                
+                // 生成平台图例
+                generatePlatformLegend();
+                
+                // 加载网络数据
+                const response = await fetch('./data/4-1data/edge_data_complete.json');
+                networkData = await response.json();
+                console.log('网络数据加载成功:', networkData);
+                
+                // 传递路径帖文ID进行过滤
+                processAllData(pathPostIds);
+                initializeVisualization();
+            } catch (error) {
+                console.error('数据加载失败:', error);
+                document.getElementById('network-info').innerHTML = '数据加载失败';
+            }
+        }
+        
+        // 处理所有数据
+        function processAllData(pathPostIds) {
+            const nodes = new Map();
+            const links = [];
+            
+            // 处理所有边类型
+            const edgeTypes = {
+                'user-post': networkData.edge_index_dict["('user', 'posted', 'post')"],
+                'post-platform': networkData.edge_index_dict["('post', 'on_platform', 'platform')"],
+                'post-spread': networkData.edge_index_dict["('post', 'spread_to', 'post')"]
+            };
+            
+            const edgeAttrs = {
+                'user-post': networkData.edge_attr_dict["('user', 'posted', 'post')"],
+                'post-platform': networkData.edge_attr_dict["('post', 'on_platform', 'platform')"],
+                'post-spread': networkData.edge_attr_dict["('post', 'spread_to', 'post')"]
+            };
+            
+            console.log('开始处理数据:', {
+                edgeTypes: Object.keys(edgeTypes),
+                userPostEdges: edgeTypes['user-post'] ? edgeTypes['user-post'].length : 0,
+                postPlatformEdges: edgeTypes['post-platform'] ? edgeTypes['post-platform'].length : 0,
+                postSpreadEdges: edgeTypes['post-spread'] ? edgeTypes['post-spread'].length : 0,
+                pathPostIdsCount: pathPostIds.size
+            });
+            
+            // 处理每种边类型
+            Object.keys(edgeTypes).forEach(type => {
+                const edges = edgeTypes[type];
+                const attrs = edgeAttrs[type];
+                
+                if (edges && edges.length >= 2) {
+                    // 第一个数组是源节点，第二个数组是目标节点
+                    const sources = edges[0];
+                    const targets = edges[1];
+                    
+                    console.log(`处理 ${type} 边:`, {
+                        sourcesLength: sources.length,
+                        targetsLength: targets.length,
+                        attrsLength: attrs ? attrs.length : 0
+                    });
+                    
+                    for (let i = 0; i < Math.min(sources.length, targets.length); i++) {
+                        const source = sources[i];
+                        const target = targets[i];
+                        const weight = attrs[i] || 1;
+                        
+                        // 检查是否包含路径中的帖文ID
+                        let shouldInclude = false;
+                        
+                        // 检查是否启用路径过滤
+                        const enableFilter = document.getElementById('enable-path-filter').checked;
+                        
+                        if (!enableFilter || pathPostIds.size === 0) {
+                            // 不启用过滤或路径数据为空，显示所有数据
+                            shouldInclude = true;
+                        } else {
+                            // 启用路径过滤
+                            if (type === 'user-post') {
+                                // 用户-帖子关系：检查帖子是否在路径中
+                                if (pathPostIds.has(target)) {
+                                    shouldInclude = true;
+                                    // console.log(`包含路径帖文: ${target} (用户-帖子关系)`);
+                                }
+                            } else if (type === 'post-platform') {
+                                // 帖子-平台关系：检查帖子是否在路径中
+                                if (pathPostIds.has(source)) {
+                                    shouldInclude = true;
+                                    // console.log(`包含路径帖文: ${source} (帖子-平台关系)`);
+                                }
+                            } else if (type === 'post-spread') {
+                                // 帖子传播关系：检查源帖子或目标帖子是否在路径中
+                                if (pathPostIds.has(source) || pathPostIds.has(target)) {
+                                    shouldInclude = true;
+                                    // console.log(`包含路径帖文: ${source} -> ${target} (帖子传播关系)`);
+                                }
+                            }
+                        }
+                        
+                        // 如果包含路径中的帖文，则添加节点和边
+                        if (shouldInclude) {
+                            // 添加节点
+                            if (!nodes.has(source)) {
+                                nodes.set(source, createNode(source));
+                            }
+                            if (!nodes.has(target)) {
+                                nodes.set(target, createNode(target));
+                            }
+                            
+                            // 添加边
+                            links.push({
+                                source: source,
+                                target: target,
+                                type: type,
+                                weight: weight,
+                                color: getLinkColor(type),
+                                width: getLinkWidth(type, weight)
+                            });
+                        }
+                    }
+                }
+            });
+            
+            allNodes = Array.from(nodes.values());
+            allLinks = links;
+            
+            console.log('处理完成:', {
+                totalNodes: allNodes.length,
+                totalLinks: allLinks.length,
+                pathPostIdsIncluded: allNodes.filter(n => n.type === 'post' && pathPostIds.has(n.id)).length,
+                nodeTypes: {
+                    user: allNodes.filter(n => n.type === 'user').length,
+                    post: allNodes.filter(n => n.type === 'post').length,
+                    platform: allNodes.filter(n => n.type === 'platform').length
+                },
+                linkTypes: {
+                    'user-post': allLinks.filter(l => l.type === 'user-post').length,
+                    'post-platform': allLinks.filter(l => l.type === 'post-platform').length,
+                    'post-spread': allLinks.filter(l => l.type === 'post-spread').length
+                }
+            });
+            
+            // 显示一些节点示例
+            if (allNodes.length > 0) {
+                console.log('节点示例:');
+                allNodes.slice(0, 5).forEach(node => {
+                    console.log(`  ${node.id} -> ${node.type} (${node.color})`);
+                });
+            }
+        }
+        
+        // 创建节点
+        function createNode(id) {
+            const nodeType = getNodeType(id);
+            const node = {
+                id: id,
+                name: id,
+                shortName: getShortName(id),
+                type: nodeType,
+                color: getNodeColor(id),
+                size: getNodeSize(id)
+            };
+            
+            // 调试信息：显示前几个节点的类型
+            if (Math.random() < 0.01) { // 只显示1%的节点信息，避免日志过多
+                console.log(`节点类型判断: ${id} -> ${nodeType} (颜色: ${node.color})`);
+            }
+            
+            return node;
+        }
+        
+        // 初始化可视化
+        function initializeVisualization() {
+            const container = document.getElementById('network-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // 移除加载提示
+            container.querySelector('.loading').remove();
+            
+            // 创建SVG
+            svg = d3.select('#network-container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // 添加缩放功能
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    svg.select('g').attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            // 创建主组
+            const g = svg.append('g');
+            
+            // 创建工具提示
+            tooltip = d3.select('body').append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0);
+            
+            // 应用过滤并更新显示
+            applyFilters();
+        }
+        
+        // 应用过滤
+        function applyFilters() {
+            // 过滤节点
+            filteredNodes = allNodes.filter(node => {
+                if (!showUsers && node.type === 'user') return false;
+                if (!showPosts && node.type === 'post') return false;
+                if (!showPlatforms && node.type === 'platform') return false;
+                return true;
+            });
+            
+            // 过滤边
+            filteredLinks = allLinks.filter(link => {
+                if (link.type === 'post-spread' && link.weight < weightThreshold) return false;
+                return true;
+            });
+            
+            // 根据当前视图进一步过滤边
+            if (currentView === 'user-post') {
+                filteredLinks = filteredLinks.filter(link => link.type === 'user-post');
+            } else if (currentView === 'post-platform') {
+                filteredLinks = filteredLinks.filter(link => link.type === 'post-platform');
+            } else if (currentView === 'post-spread') {
+                filteredLinks = filteredLinks.filter(link => link.type === 'post-spread');
+            }
+            
+            // 只保留有连接的节点（但保留孤立节点如果它们被选中）
+            const connectedNodes = new Set();
+            filteredLinks.forEach(link => {
+                connectedNodes.add(link.source);
+                connectedNodes.add(link.target);
+            });
+            
+            // 保留有连接的节点，以及当前选中的孤立节点
+            filteredNodes = filteredNodes.filter(node => {
+                return connectedNodes.has(node.id) || 
+                       (node.type === 'user' && showUsers) ||
+                       (node.type === 'post' && showPosts) ||
+                       (node.type === 'platform' && showPlatforms);
+            });
+            
+            console.log('过滤后:', {
+                nodes: filteredNodes.length,
+                links: filteredLinks.length,
+                connectedNodes: connectedNodes.size
+            });
+            
+            updateVisualization();
+        }
+        
+        // 更新可视化
+        function updateVisualization() {
+            if (!svg) return;
+            
+            console.log('更新可视化:', {
+                nodes: filteredNodes.length,
+                links: filteredLinks.length,
+                view: currentView
+                // aggregationMode: aggregationMode
+            });
+            
+            const container = document.getElementById('network-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // 清除现有内容
+            svg.selectAll('*').remove();
+            
+            // 重新添加缩放
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    svg.select('g').attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            const g = svg.append('g');
+            
+            // 创建力导向布局
+            simulation = d3.forceSimulation(filteredNodes)
+                .force('link', d3.forceLink(filteredLinks).id(d => d.id).distance(50))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(20));
+            
+            // 绘制边
+            const link = g.append('g')
+                .selectAll('line')
+                .data(filteredLinks)
+                .enter().append('line')
+                .attr('stroke', d => d.color)
+                .attr('stroke-width', d => d.width)
+                .attr('opacity', 0.6);
+            
+            // 绘制节点
+            const node = g.append('g')
+                .selectAll('circle')
+                .data(filteredNodes)
+                .enter().append('circle')
+                .attr('r', d => d.size)
+                .attr('fill', d => d.color)
+                .attr('stroke', d => {
+                    // 为平台节点添加特殊边框
+                    if (d.type === 'platform') {
+                        if (d.id === 'P_5' || d.id === '微信') {
+                            return '#FF6B35'; // 微信橙色边框
+                        } else if (d.id === 'P_3' || d.id === '今日头条') {
+                            return '#AD748C'; // 今日头条紫色边框
+                        } else if (d.id === 'P_0' || d.id === '微博') {
+                            return '#4A90E2'; // 微博蓝色边框
+                        } else if (d.id === 'P_2' || d.id === '抖音') {
+                            return '#AC6158'; // 抖音红色边框
+                        } else if (d.id === 'P_4' || d.id === '小红书') {
+                            return '#3E5555'; // 小红书深绿色边框
+                        } else if (d.id === 'P_1' || d.id === '网易新闻') {
+                            return '#C3AB32'; // 网易新闻黄色边框
+                        }
+                        return '#333'; // 其他平台黑色边框
+                    }
+                    return '#fff';
+                })
+                .attr('stroke-width', d => {
+                    // 为平台节点添加更粗的边框
+                    if (d.type === 'platform') {
+                        return 3;
+                    }
+                    return 2;
+                })
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            console.log('绘制的节点数:', node.size());
+            console.log('绘制的边数:', link.size());
+            
+            // 添加节点标签
+            const label = g.append('g')
+                .selectAll('text')
+                .data(filteredNodes)
+                .enter().append('text')
+                .text(d => {
+                    if (!showLabels) return '';
+                    if (d.count && d.count > 1) {
+                        return `${d.shortName} (${d.count})`;
+                    }
+                    return d.shortName;
+                })
+                .attr('font-size', '10px')
+                .attr('fill', '#333')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.35em');
+            
+            // 添加边权重标签
+            const weightLabel = g.append('g')
+                .selectAll('text')
+                .data(showWeights ? filteredLinks.filter(d => d.type === 'post-spread' || d.type.includes('link')) : [])
+                .enter().append('text')
+                .text(d => {
+                    if (d.count && d.count > 1) {
+                        return `${d.weight.toFixed(3)} (${d.count})`;
+                    }
+                    return d.weight.toFixed(3);
+                })
+                .attr('font-size', '8px')
+                .attr('fill', '#666')
+                .attr('text-anchor', 'middle');
+            
+            // 添加悬停效果
+            node.on('mouseover', function(event, d) {
+                d3.select(this).attr('r', d.size * 1.5);
+                showTooltip(event, d);
+            })
+            .on('mouseout', function(event, d) {
+                d3.select(this).attr('r', d.size);
+                hideTooltip();
+            })
+            .on('click', function(event, d) {
+                // 点击节点时高亮显示
+                highlightNode(d);
+            });
+            
+            // 更新位置
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+                
+                label
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+                
+                weightLabel
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2);
+            });
+            
+            // 更新信息面板
+            updateNetworkInfo();
+            updatePerformanceInfo();
+        }
+        
+        // 获取节点类型
+        function getNodeType(id) {
+            // 检查是否为平台节点（P_格式或纯平台名称）
+            if (id.startsWith('P_') || ['WB', 'WYXW', 'DY', 'JRTT', 'XHS', 'VX', '微博', '网易新闻', '抖音', '今日头条', '小红书', '微信'].includes(id)) {
+                return 'platform';
+            }
+            
+            // 检查是否为帖文节点（时间戳格式）
+            if (id.match(/^(VX|JRTT|WB|DY|XHS|WYXW)_\d{8,}_\d+$/)) {
+                return 'post';
+            }
+            
+            // 检查是否为用户节点（用户名格式）
+            if (id.match(/^(VX|JRTT|WB|DY|XHS|WYXW)_.*_\d+$/)) {
+                return 'user';
+            }
+            
+            // 默认返回用户类型
+            return 'user';
+        }
+        
+        // 获取节点颜色
+        function getNodeColor(id) {
+            const type = getNodeType(id);
+            
+            // 如果是平台节点，按平台颜色编码
+            if (type === 'platform') {
+                const platform = extractPlatformFromPlatformId(id);
+                return getPlatformColor(platform);
+            }
+            
+            // 其他节点类型保持原色
+            switch (type) {
+                case 'user': return '#ff6b6b';
+                case 'post': return '#4ecdc4';
+                default: return '#95a5a6';
+            }
+        }
+        
+        // 从平台ID提取平台信息
+        function extractPlatformFromPlatformId(id) {
+            // 平台ID映射关系（支持P_格式和简短代号）
+            const platformMapping = {
+                'P_0': '微博',    // 微博
+                'P_1': '网易新闻',  // 网易新闻
+                'P_2': '抖音',    // 抖音
+                'P_3': '今日头条',  // 今日头条
+                'P_4': '小红书',   // 小红书
+                'P_5': '微信',    // 微信
+                'WB': '微博',     // 微博
+                'WYXW': '网易新闻', // 网易新闻
+                'DY': '抖音',     // 抖音
+                'JRTT': '今日头条', // 今日头条
+                'XHS': '小红书',   // 小红书
+                'VX': '微信'      // 微信
+            };
+            
+            return platformMapping[id] || '未知平台';
+        }
+        
+
+        
+        // 获取节点大小
+        function getNodeSize(id) {
+            const type = getNodeType(id);
+            switch (type) {
+                case 'user': return 5; 
+                case 'post': return 4;
+                case 'platform': return 10;
+                default: return 4;
+            }
+        }
+        
+        // 获取短名称
+        function getShortName(id) {
+            // 如果是平台节点，返回完整的平台名称
+            if (getNodeType(id) === 'platform') {
+                return extractPlatformFromPlatformId(id);
+            }
+            
+            // 其他节点按原逻辑处理
+            if (id.length > 12) {
+                return id.substring(0, 9) + '...';
+            }
+            return id;
+        }
+        
+        // 获取边颜色
+        function getLinkColor(type) {
+            switch (type) {
+                case 'user-post': return '#ff6b6b';
+                case 'post-platform': return '#45b7d1';
+                case 'post-spread': return '#96ceb4';
+                default: return '#999';
+            }
+        }
+        
+        // 获取边宽度
+        function getLinkWidth(type, weight) {
+            if (type === 'post-spread') {
+                return Math.max(1, weight * 20);
+            }
+            return 2;
+        }
+        
+        // 拖拽功能
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        // 工具提示
+        function showTooltip(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style('opacity', .9);
+            
+            let displayName = d.name;
+            // 如果是平台节点，显示完整的平台名称
+            if (d.type === 'platform') {
+                displayName = extractPlatformFromPlatformId(d.name);
+            }
+            
+            let tooltipContent = `
+                <strong>${getNodeTypeName(d.type)}</strong><br>
+                ID: ${displayName}<br>
+                类型: ${d.type}
+            `;
+            
+            if (d.count && d.count > 1) {
+                tooltipContent += `<br>包含节点数: ${d.count}`;
+            }
+            
+            if (d.members && d.members.length > 0) {
+                tooltipContent += `<br>成员: ${d.members.slice(0, 3).join(', ')}`;
+                if (d.members.length > 3) {
+                    tooltipContent += `... (共${d.members.length}个)`;
+                }
+            }
+            
+            tooltip.html(tooltipContent)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        }
+        
+        function hideTooltip() {
+            tooltip.transition()
+                .duration(500)
+                .style('opacity', 0);
+        }
+        
+        // 高亮节点
+        function highlightNode(selectedNode) {
+            // 重置所有节点的样式
+            svg.selectAll('circle').attr('opacity', 0.3);
+            
+            // 高亮选中的节点
+            svg.selectAll('circle').filter(d => d.id === selectedNode.id)
+                .attr('opacity', 1)
+                .attr('r', d => d.size * 2); // 放大选中的节点
+            
+            // 高亮与选中节点相连的边
+            svg.selectAll('line').attr('opacity', 0.1);
+            svg.selectAll('line').filter(d => 
+                d.source.id === selectedNode.id || d.target.id === selectedNode.id
+            ).attr('opacity', 0.8);
+            
+            // 显示节点信息
+            console.log('高亮节点:', selectedNode);
+            
+            // 3秒后恢复所有节点
+            setTimeout(() => {
+                svg.selectAll('circle').attr('opacity', 1).attr('r', d => d.size);
+                svg.selectAll('line').attr('opacity', 0.6);
+            }, 3000);
+        }
+        
+        
+        // 更新信息面板
+        function updateNetworkInfo() {
+            const userNodes = filteredNodes.filter(n => n.type === 'user').length;
+            const postNodes = filteredNodes.filter(n => n.type === 'post').length;
+            const platformNodes = filteredNodes.filter(n => n.type === 'platform').length;
+            const communityNodes = filteredNodes.filter(n => n.type === 'community').length;
+            
+            // 更新控制面板中的网络信息
+            document.getElementById('node-count').textContent = filteredNodes.length;
+            document.getElementById('edge-count').textContent = filteredLinks.length;
+            document.getElementById('current-view').textContent = getViewName(currentView);
+            document.getElementById('user-count').textContent = userNodes;
+            document.getElementById('post-count').textContent = postNodes;
+            document.getElementById('platform-count').textContent = platformNodes;
+            document.getElementById('threshold-display').textContent = weightThreshold.toFixed(3);
+        }
+        
+        // 获取聚合模式名称
+        function getAggregationModeName(mode) {
+            const names = {
+                'none': '无聚合',
+                'community': '社区聚合',
+                'platform': '平台聚合',
+                'user': '用户聚合',
+                'simple': '简化聚合'
+            };
+            return names[mode] || mode;
+        }
+        
+        // 更新性能信息
+        function updatePerformanceInfo() {
+            const performanceInfo = document.getElementById('performance-info');
+            const fps = Math.round(1000 / (Date.now() - (window.lastTime || Date.now())));
+            window.lastTime = Date.now();
+            
+            performanceInfo.innerHTML = `
+                节点: ${filteredNodes.length} | 
+                边: ${filteredLinks.length}
+            `;
+        }
+        
+        // 获取节点类型中文名称
+        function getNodeTypeName(type) {
+            const names = {
+                'user': '用户',
+                'post': '帖文',
+                'platform': '平台',
+                'community': '社区'
+            };
+            return names[type] || type;
+        }
+        
+        // 获取视图名称
+        function getViewName(view) {
+            const names = {
+                'all': '全部关系',
+                'user-post': '用户-帖文',
+                'post-platform': '帖文-平台',
+                'post-spread': '帖文传播'
+            };
+            return names[view] || view;
+        }
+        
+        // 切换视图
+        function showView(view) {
+            currentView = view;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 重新应用过滤（包括视图过滤）
+            applyFilters();
+        }
+        
+        // 更新权重过滤
+        function updateWeightFilter() {
+            weightThreshold = parseFloat(document.getElementById('weight-slider').value);
+            document.getElementById('weight-value').textContent = weightThreshold.toFixed(2);
+            applyFilters();
+        }
+        
+        // 更新节点过滤
+        function updateNodeFilter() {
+            showUsers = document.getElementById('show-users').checked;
+            showPosts = document.getElementById('show-posts').checked;
+            showPlatforms = document.getElementById('show-platforms').checked;
+            applyFilters();
+        }
+        
+        // 更新标签显示
+        function updateLabels() {
+            showLabels = document.getElementById('show-labels').checked;
+            updateVisualization();
+        }
+        
+        // 更新权重显示
+        function updateWeights() {
+            showWeights = document.getElementById('show-weights').checked;
+            updateVisualization();
+        }
+
+        // 更新聚合计数显示
+        // function updateCounts() {
+        //     const showCounts = document.getElementById('show-counts').checked;
+        //     if (showCounts && aggregationMode !== 'none') {
+        //         // 根据聚合模式处理数据
+        //         const { aggregatedNodes: nodes, aggregatedLinks: links } = aggregateData();
+        //         filteredNodes = nodes;
+        //         filteredLinks = links;
+        //     } else {
+        //         // 取消聚合，恢复原始数据
+        //         applyFilters();
+        //         return;
+        //     }
+        //     updateVisualization();
+        // }
+        
+        // 聚合数据
+        // function aggregateData() {
+        //     const aggregatedNodes = new Map();
+        //     const aggregatedLinks = [];
+        //     
+        //     if (aggregationMode === 'community') {
+        //         return aggregateByCommunity();
+        //     } else if (aggregationMode === 'platform') {
+        //         return aggregateByPlatform();
+        //     } else if (aggregationMode === 'user') {
+        //         return aggregateByUser();
+        //     } else if (aggregationMode === 'simple') {
+        //         return aggregateBySimple();
+        //     }
+        //     
+        //     return { aggregatedNodes: [], aggregatedLinks: [] };
+        // }
+        
+        // 按社区聚合
+        function aggregateByCommunity() {
+            const communities = new Map();
+            const communityLinks = new Map();
+            
+            // 检测社区（基于连接度）
+            const nodeCommunities = detectCommunities(filteredNodes, filteredLinks);
+            
+            // 聚合节点
+            filteredNodes.forEach(node => {
+                const communityId = nodeCommunities.get(node.id) || 'community_' + node.id.split('_')[0];
+                if (!communities.has(communityId)) {
+                    communities.set(communityId, {
+                        id: communityId,
+                        name: `社区 ${communityId}`,
+                        shortName: `社区${communityId}`,
+                        type: 'community',
+                        color: getCommunityColor(communityId),
+                        size: 12,
+                        count: 0,
+                        members: []
+                    });
+                }
+                const community = communities.get(communityId);
+                community.count++;
+                community.members.push(node.id);
+            });
+            
+            // 聚合边
+            filteredLinks.forEach(link => {
+                const sourceCommunity = nodeCommunities.get(link.source) || 'community_' + link.source.split('_')[0];
+                const targetCommunity = nodeCommunities.get(link.target) || 'community_' + link.target.split('_')[0];
+                
+                if (sourceCommunity !== targetCommunity) {
+                    const linkKey = `${sourceCommunity}-${targetCommunity}`;
+                    if (!communityLinks.has(linkKey)) {
+                        communityLinks.set(linkKey, {
+                            source: communities.get(sourceCommunity),
+                            target: communities.get(targetCommunity),
+                            type: 'community-link',
+                            weight: 0,
+                            count: 0,
+                            color: '#808080',
+                            width: 2
+                        });
+                    }
+                    const communityLink = communityLinks.get(linkKey);
+                    communityLink.weight += link.weight;
+                    communityLink.count++;
+                }
+            });
+            
+            return {
+                aggregatedNodes: Array.from(communities.values()),
+                aggregatedLinks: Array.from(communityLinks.values())
+            };
+        }
+        
+        // 按平台聚合
+        function aggregateByPlatform() {
+            const platforms = new Map();
+            const platformLinks = new Map();
+            
+            // 聚合节点
+            filteredNodes.forEach(node => {
+                const platformId = extractPlatform(node.id);
+                if (!platforms.has(platformId)) {
+                    platforms.set(platformId, {
+                        id: platformId,
+                        name: platformId,
+                        shortName: platformId,
+                        type: 'platform',
+                        color: getPlatformColor(platformId),
+                        size: 10,
+                        count: 0,
+                        members: []
+                    });
+                }
+                const platform = platforms.get(platformId);
+                platform.count++;
+                platform.members.push(node.id);
+            });
+            
+            // 聚合边
+            filteredLinks.forEach(link => {
+                const sourcePlatform = extractPlatform(link.source);
+                const targetPlatform = extractPlatform(link.target);
+                
+                if (sourcePlatform !== targetPlatform) {
+                    const linkKey = `${sourcePlatform}-${targetPlatform}`;
+                    if (!platformLinks.has(linkKey)) {
+                        platformLinks.set(linkKey, {
+                            source: platforms.get(sourcePlatform),
+                            target: platforms.get(targetPlatform),
+                            type: 'platform-link',
+                            weight: 0,
+                            count: 0,
+                            color: '#45b7d1',
+                            width: 2
+                        });
+                    }
+                    const platformLink = platformLinks.get(linkKey);
+                    platformLink.weight += link.weight;
+                    platformLink.count++;
+                }
+            });
+            
+            return {
+                aggregatedNodes: Array.from(platforms.values()),
+                aggregatedLinks: Array.from(platformLinks.values())
+            };
+        }
+        
+        // 按用户聚合
+        function aggregateByUser() {
+            const users = new Map();
+            const userLinks = new Map();
+            
+            // 聚合节点
+            filteredNodes.forEach(node => {
+                const userId = extractUser(node.id);
+                if (!users.has(userId)) {
+                    users.set(userId, {
+                        id: userId,
+                        name: userId,
+                        shortName: userId,
+                        type: 'user',
+                        color: '#ff6b6b',
+                        size: 8,
+                        count: 0,
+                        members: []
+                    });
+                }
+                const user = users.get(userId);
+                user.count++;
+                user.members.push(node.id);
+            });
+            
+            // 聚合边
+            filteredLinks.forEach(link => {
+                const sourceUser = extractUser(link.source);
+                const targetUser = extractUser(link.target);
+                
+                if (sourceUser !== targetUser) {
+                    const linkKey = `${sourceUser}-${targetUser}`;
+                    if (!userLinks.has(linkKey)) {
+                        userLinks.set(linkKey, {
+                            source: users.get(sourceUser),
+                            target: users.get(targetUser),
+                            type: 'user-link',
+                            weight: 0,
+                            count: 0,
+                            color: '#ff6b6b',
+                            width: 2
+                        });
+                    }
+                    const userLink = userLinks.get(linkKey);
+                    userLink.weight += link.weight;
+                    userLink.count++;
+                }
+            });
+            
+            return {
+                aggregatedNodes: Array.from(users.values()),
+                aggregatedLinks: Array.from(userLinks.values())
+            };
+        }
+
+        // 简化聚合 (仅用于大量数据)
+        function aggregateBySimple() {
+            const aggregatedNodes = new Map();
+            const aggregatedLinks = [];
+
+            // 聚合节点
+            filteredNodes.forEach(node => {
+                const id = node.id;
+                if (!aggregatedNodes.has(id)) {
+                    aggregatedNodes.set(id, {
+                        id: id,
+                        name: id,
+                        shortName: getShortName(id),
+                        type: getNodeType(id),
+                        color: getNodeColor(id),
+                        size: getNodeSize(id),
+                        count: 0,
+                        members: []
+                    });
+                }
+                const aggNode = aggregatedNodes.get(id);
+                aggNode.count++;
+                aggNode.members.push(id);
+            });
+
+            // 聚合边
+            filteredLinks.forEach(link => {
+                const source = link.source;
+                const target = link.target;
+                const weight = link.weight;
+
+                if (!aggregatedNodes.has(source) || !aggregatedNodes.has(target)) {
+                    // 如果源或目标节点未聚合，则跳过该边
+                    return;
+                }
+
+                const sourceAgg = aggregatedNodes.get(source);
+                const targetAgg = aggregatedNodes.get(target);
+
+                if (sourceAgg.type === targetAgg.type) { // 同类节点聚合
+                    const linkKey = `${sourceAgg.id}-${targetAgg.id}`;
+                    if (!aggregatedLinks.some(aggLink => aggLink.source.id === sourceAgg.id && aggLink.target.id === targetAgg.id)) {
+                        aggregatedLinks.push({
+                            source: sourceAgg,
+                            target: targetAgg,
+                            type: 'simple-link', // 简化聚合边
+                            weight: 0,
+                            count: 0,
+                            color: getLinkColor(link.type), // 使用原始边颜色
+                            width: getLinkWidth(link.type, weight)
+                        });
+                    }
+                    const simpleLink = aggregatedLinks.find(aggLink => aggLink.source.id === sourceAgg.id && aggLink.target.id === targetAgg.id);
+                    simpleLink.weight += weight;
+                    simpleLink.count++;
+                } else { // 不同类节点聚合
+                    const linkKey = `${sourceAgg.id}-${targetAgg.id}`;
+                    if (!aggregatedLinks.some(aggLink => aggLink.source.id === sourceAgg.id && aggLink.target.id === targetAgg.id)) {
+                        aggregatedLinks.push({
+                            source: sourceAgg,
+                            target: targetAgg,
+                            type: 'simple-link', // 简化聚合边
+                            weight: 0,
+                            count: 0,
+                            color: '#808080', // 聚合边颜色
+                            width: 2
+                        });
+                    }
+                    const simpleLink = aggregatedLinks.find(aggLink => aggLink.source.id === sourceAgg.id && aggLink.target.id === targetAgg.id);
+                    simpleLink.weight += weight;
+                    simpleLink.count++;
+                }
+            });
+
+            return {
+                aggregatedNodes: Array.from(aggregatedNodes.values()),
+                aggregatedLinks: aggregatedLinks
+            };
+        }
+        
+        // 社区检测算法（简化版）
+        function detectCommunities(nodes, links) {
+            const nodeCommunities = new Map();
+            const visited = new Set();
+            let communityId = 0;
+            
+            // 为每个节点分配社区
+            nodes.forEach(node => {
+                if (!visited.has(node.id)) {
+                    const community = new Set();
+                    dfs(node.id, links, visited, community);
+                    
+                    // 为社区分配ID
+                    community.forEach(nodeId => {
+                        nodeCommunities.set(nodeId, communityId);
+                    });
+                    communityId++;
+                }
+            });
+            
+            return nodeCommunities;
+        }
+        
+        // 深度优先搜索
+        function dfs(nodeId, links, visited, community) {
+            visited.add(nodeId);
+            community.add(nodeId);
+            
+            // 查找连接的节点
+            links.forEach(link => {
+                if (link.source === nodeId && !visited.has(link.target)) {
+                    dfs(link.target, links, visited, community);
+                }
+                if (link.target === nodeId && !visited.has(link.source)) {
+                    dfs(link.source, links, visited, community);
+                }
+            });
+        }
+        
+        // 提取平台信息
+        function extractPlatform(nodeId) {
+            const parts = nodeId.split('_');
+            if (parts.length > 0) {
+                return parts[0];
+            }
+            return 'unknown';
+        }
+        
+        // 提取用户信息
+        function extractUser(nodeId) {
+            const parts = nodeId.split('_');
+            if (parts.length > 1) {
+                return parts[1];
+            }
+            return nodeId;
+        }
+        
+        // 获取社区颜色
+        function getCommunityColor(communityId) {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+            const index = parseInt(communityId.toString().replace(/\D/g, '')) % colors.length;
+            return colors[index];
+        }
+        
+        // 获取平台颜色
+        function getPlatformColor(platformId) {
+            const platformColors = {
+                'JRTT': '#ff6b6b',
+                'VX': '#4ecdc4',
+                'WB': '#45b7d1',
+                'DY': '#96ceb4',
+                'XHS': '#feca57',
+                'WYXW': '#ff9ff3'
+            };
+            return platformColors[platformId] || '#808080';
+        }
+        
+        // 切换路径过滤
+        function togglePathFilter() {
+            const enableFilter = document.getElementById('enable-path-filter').checked;
+            console.log('路径过滤状态:', enableFilter);
+            
+            // 重新处理数据
+            if (networkData) {
+                if (enableFilter && window.pathPostIds) {
+                    processAllData(window.pathPostIds);
+                } else {
+                    processAllData(new Set()); // 空集合表示不过滤
+                }
+                applyFilters();
+            }
+        }
+        
+        // 设置聚合模式
+        // function setAggregationMode(mode) {
+        //     aggregationMode = mode;
+        //     document.querySelectorAll('.control-btn').forEach(btn => {
+        //         btn.classList.remove('active');
+        //     });
+        //     document.querySelector(`.control-btn[onclick="setAggregationMode('${mode}')"]`).classList.add('active');
+        //     updateCounts(); // 应用新的聚合模式
+        // }
+        
+        // 重置布局
+        function resetLayout() {
+            if (simulation) {
+                simulation.alpha(1).restart();
+            }
+        }
+        
+        // 切换模拟
+        function toggleSimulation() {
+            if (simulation) {
+                if (isSimulationRunning) {
+                    simulation.stop();
+                } else {
+                    simulation.alpha(1).restart();
+                }
+                isSimulationRunning = !isSimulationRunning;
+            }
+        }
+        
+        // 知识图谱查询功能
+        function searchNode() {
+            const query = document.getElementById('query-input').value.trim();
+            if (!query) return;
+            
+            const results = [];
+            
+            // 搜索节点
+            allNodes.forEach(node => {
+                if (node.id.toLowerCase().includes(query.toLowerCase()) ||
+                    node.name.toLowerCase().includes(query.toLowerCase())) {
+                    results.push({
+                        type: 'node',
+                        data: node,
+                        match: node.id.includes(query) ? 'exact' : 'partial'
+                    });
+                }
+            });
+            
+            // 搜索边
+            allLinks.forEach(link => {
+                if (link.source.toLowerCase().includes(query.toLowerCase()) ||
+                    link.target.toLowerCase().includes(query.toLowerCase())) {
+                    results.push({
+                        type: 'link',
+                        data: link,
+                        match: 'related'
+                    });
+                }
+            });
+            
+            displayQueryResults(results, `搜索 "${query}" 的结果`);
+        }
+        
+        function findPath() {
+            const query = document.getElementById('query-input').value.trim();
+            if (!query) return;
+            
+            const parts = query.split('->');
+            if (parts.length !== 2) {
+                displayQueryResults([], '请输入格式: 节点A->节点B');
+                return;
+            }
+            
+            const source = parts[0].trim();
+            const target = parts[1].trim();
+            
+            // 简单的路径查找（BFS）
+            const path = findShortestPath(source, target);
+            
+            if (path) {
+                displayQueryResults([{
+                    type: 'path',
+                    data: path,
+                    match: 'exact'
+                }], `从 ${source} 到 ${target} 的路径`);
+            } else {
+                displayQueryResults([], `未找到从 ${source} 到 ${target} 的路径`);
+            }
+        }
+        
+        function findInfluencers() {
+            // 查找影响力最大的节点
+            const influenceMap = new Map();
+            
+            // 计算入度（被传播次数）
+            allLinks.forEach(link => {
+                if (link.type === 'post-spread') {
+                    const target = link.target;
+                    influenceMap.set(target, (influenceMap.get(target) || 0) + link.weight);
+                }
+            });
+            
+            // 排序并取前10个
+            const topInfluencers = Array.from(influenceMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([nodeId, influence]) => ({
+                    type: 'influencer',
+                    data: { id: nodeId, influence: influence },
+                    match: 'top'
+                }));
+            
+            displayQueryResults(topInfluencers, '影响力最大的节点（按传播强度排序）');
+        }
+        
+        function findShortestPath(source, target) {
+            // 构建邻接表
+            const graph = new Map();
+            allLinks.forEach(link => {
+                if (!graph.has(link.source)) graph.set(link.source, []);
+                if (!graph.has(link.target)) graph.set(link.target, []);
+                graph.get(link.source).push(link.target);
+            });
+            
+            // BFS查找最短路径
+            const queue = [[source]];
+            const visited = new Set([source]);
+            
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const current = path[path.length - 1];
+                
+                if (current === target) {
+                    return path;
+                }
+                
+                const neighbors = graph.get(current) || [];
+                for (const neighbor of neighbors) {
+                    if (!visited.has(neighbor)) {
+                        visited.add(neighbor);
+                        queue.push([...path, neighbor]);
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        function displayQueryResults(results, title) {
+            const resultsDiv = document.getElementById('query-results');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `<div class="query-result">${title}: 无结果</div>`;
+                return;
+            }
+            
+            let html = `<div class="query-title">${title} (${results.length}个结果)</div>`;
+            
+            results.forEach(result => {
+                switch (result.type) {
+                    case 'node':
+                        html += `<div class="query-result">
+                            <strong>节点:</strong> ${result.data.id}<br>
+                            <small>类型: ${result.data.type}</small>
+                        </div>`;
+                        break;
+                    case 'link':
+                        html += `<div class="query-result">
+                            <strong>边:</strong> ${result.data.source} → ${result.data.target}<br>
+                            <small>类型: ${result.data.type}, 权重: ${result.data.weight.toFixed(3)}</small>
+                        </div>`;
+                        break;
+                    case 'path':
+                        html += `<div class="query-result">
+                            <strong>路径:</strong> ${result.data.join(' → ')}<br>
+                            <small>长度: ${result.data.length - 1} 跳</small>
+                        </div>`;
+                        break;
+                    case 'influencer':
+                        html += `<div class="query-result">
+                            <strong>影响力节点:</strong> ${result.data.id}<br>
+                            <small>传播强度: ${result.data.influence.toFixed(3)}</small>
+                        </div>`;
+                        break;
+                }
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 高亮查询结果
+        function highlightQueryResults(results) {
+            // 清除之前的高亮
+            svg.selectAll('circle').attr('stroke', '#fff').attr('stroke-width', 2);
+            svg.selectAll('line').attr('stroke-width', d => d.width);
+            
+            if (!results || results.length === 0) return;
+            
+            // 高亮相关节点和边
+            results.forEach(result => {
+                if (result.type === 'node') {
+                    svg.selectAll('circle').filter(d => d.id === result.data.id)
+                        .attr('stroke', '#ff0000').attr('stroke-width', 4);
+                } else if (result.type === 'link') {
+                    svg.selectAll('line').filter(d => 
+                        d.source === result.data.source && d.target === result.data.target)
+                        .attr('stroke-width', d => d.width * 2);
+                }
+            });
+        }
+        
+        // 初始化演化树
+        function initializeEvolutionTree() {
+            treeContainer = document.getElementById('evolution-tree-container');
+            treeContainer.querySelector('.loading').remove();
+            
+            // 创建演化树容器
+            const treeDiv = document.createElement('div');
+            treeDiv.className = 'evolution-tree';
+            treeContainer.appendChild(treeDiv);
+            
+            // 创建工具提示
+            treeTooltip = document.createElement('div');
+            treeTooltip.className = 'tree-tooltip';
+            treeTooltip.style.opacity = '0';
+            document.body.appendChild(treeTooltip);
+        }
+        
+        // 处理演化数据
+        function processEvolutionData(pathsData) {
+            const allPosts = [];
+            
+            // 提取所有帖子并按时间排序
+            pathsData.forEach(path => {
+                if (path.路径 && Array.isArray(path.路径)) {
+                    path.路径.forEach(post => {
+                        if (post.帖文ID && post.时间) {
+                            allPosts.push({
+                                id: post.帖文ID,
+                                time: new Date(post.时间),
+                                platform: post.平台,
+                                topicId: path.话题编号 || 0
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // 按时间排序
+            allPosts.sort((a, b) => a.time - b.time);
+            
+            // 按主题分组
+            const topics = new Map();
+            allPosts.forEach(post => {
+                if (!topics.has(post.topicId)) {
+                    topics.set(post.topicId, []);
+                }
+                topics.get(post.topicId).push(post);
+            });
+            
+            // 识别关键节点
+            const keyNodes = identifyKeyNodes(allPosts);
+            
+            // 计算热度
+            const heatMap = calculateHeatMap(allPosts);
+            
+            return {
+                posts: allPosts,
+                topics: topics,
+                keyNodes: keyNodes,
+                heatMap: heatMap
+            };
+        }
+        
+        // 识别关键节点
+        function identifyKeyNodes(posts) {
+            const keyNodes = new Set();
+            
+            // 第一个帖子作为根节点
+            if (posts.length > 0) {
+                keyNodes.add(posts[0].id);
+            }
+            
+            // 识别平台转换节点（当话题从一个平台传播到另一个平台时）
+            for (let i = 1; i < posts.length; i++) {
+                const currentPost = posts[i];
+                const prevPost = posts[i - 1];
+                
+                // 如果平台发生变化，标记为关键节点
+                if (currentPost.platform !== prevPost.platform) {
+                    keyNodes.add(currentPost.id);
+                }
+            }
+            
+            // 每个主题的最后一个帖子作为叶子节点
+            const topicLastPosts = new Map();
+            posts.forEach(post => {
+                if (!topicLastPosts.has(post.topicId) || 
+                    post.time > topicLastPosts.get(post.topicId).time) {
+                    topicLastPosts.set(post.topicId, post);
+                }
+            });
+            
+            topicLastPosts.forEach(post => {
+                keyNodes.add(post.id);
+            });
+            
+            return keyNodes;
+        }
+        
+        // 计算热度映射
+        function calculateHeatMap(posts) {
+            const heatMap = new Map();
+            
+            // 按时间窗口计算热度
+            const timeWindows = new Map();
+            const windowSize = 60 * 60 * 1000; // 1小时窗口
+            
+            posts.forEach(post => {
+                const windowKey = Math.floor(post.time.getTime() / windowSize);
+                if (!timeWindows.has(windowKey)) {
+                    timeWindows.set(windowKey, []);
+                }
+                timeWindows.get(windowKey).push(post);
+            });
+            
+            // 计算每个帖子的热度（基于时间窗口内的帖子数量）
+            posts.forEach(post => {
+                const windowKey = Math.floor(post.time.getTime() / windowSize);
+                const windowPosts = timeWindows.get(windowKey) || [];
+                const heat = windowPosts.length;
+                heatMap.set(post.id, heat);
+            });
+            
+            return heatMap;
+        }
+        
+        // 获取平台颜色
+        function getPlatformColor(platform) {
+            const colors = {
+                'DY': '#AC6158',    // 抖音
+                'XHS': '#3E5555',   // 小红书
+                'WYXW': '#C3AB32',  // 网易新闻
+                'JRTT': '#AD748C',  // 今日头条
+                'VX': '#E17D66',    // 微信
+                'WB': '#4A90E2',    // 微博
+                '抖音': '#AC6158',    // 抖音
+                '小红书': '#3E5555',   // 小红书
+                '网易新闻': '#C3AB32',  // 网易新闻
+                '今日头条': '#AD748C',  // 今日头条
+                '微信': '#E17D66',    // 微信
+                '微博': '#4A90E2'     // 微博
+            };
+            return colors[platform] || '#95a5a6';
+        }
+        
+        // 生成话题图例
+        function generateTopicLegend(evolutionData) {
+            const legendContainer = document.getElementById('topic-legend');
+            const topics = Array.from(evolutionData.topics.keys()).sort((a, b) => a - b);
+            
+            legendContainer.innerHTML = '';
+            
+            topics.forEach(topicId => {
+                const legendItem = document.createElement('div');
+                legendItem.style.display = 'flex';
+                legendItem.style.alignItems = 'center';
+                legendItem.style.gap = '5px';
+                
+                const topicDot = document.createElement('div');
+                topicDot.style.width = '8px';
+                topicDot.style.height = '8px';
+                topicDot.style.borderRadius = '50%';
+                topicDot.style.backgroundColor = '#666';
+                
+                const label = document.createElement('span');
+                label.textContent = `话题${topicId}`;
+                
+                legendItem.appendChild(topicDot);
+                legendItem.appendChild(label);
+                legendContainer.appendChild(legendItem);
+            });
+        }
+        
+        // 生成平台图例
+        function generatePlatformLegend() {
+            const legendContainer = document.getElementById('platform-legend');
+            const platforms = [
+                { id: 'P_0', name: '微博', color: '#4A90E2', fullName: '微博'},
+                { id: 'P_1', name: '网易新闻', color: '#C3AB32', fullName: '网易新闻'},
+                { id: 'P_2', name: '抖音', color: '#AC6158', fullName: '抖音'},
+                { id: 'P_3', name: '今日头条', color: '#AD748C', fullName: '今日头条'},
+                { id: 'P_4', name: '小红书', color: '#3E5555', fullName: '小红书'},
+                { id: 'P_5', name: '微信', color: '#E17D66', fullName: '微信'}
+            ];
+            
+            legendContainer.innerHTML = '';
+            
+            platforms.forEach(platform => {
+                const legendItem = document.createElement('div');
+                legendItem.style.display = 'flex';
+                legendItem.style.alignItems = 'center';
+                legendItem.style.gap = '5px';
+                legendItem.style.fontSize = '12px';
+                
+                const colorDot = document.createElement('div');
+                colorDot.style.width = '12px';
+                colorDot.style.height = '12px';
+                colorDot.style.borderRadius = '50%';
+                colorDot.style.backgroundColor = platform.color;
+                
+                const label = document.createElement('span');
+                label.textContent = `${platform.name}`;
+                
+                legendItem.appendChild(colorDot);
+                legendItem.appendChild(label);
+                legendContainer.appendChild(legendItem);
+            });
+        }
+        
+        // 绘制演化树
+        function drawEvolutionTree(evolutionData) {
+            const container = document.getElementById('evolution-tree-container');
+            const treeDiv = container.querySelector('.evolution-tree');
+            treeDiv.innerHTML = '';
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const margin = 20;
+            
+            const posts = evolutionData.posts;
+            const topics = evolutionData.topics;
+            const keyNodes = evolutionData.keyNodes;
+            const heatMap = evolutionData.heatMap;
+            
+            if (posts.length === 0) {
+                treeDiv.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">暂无数据</div>';
+                return;
+            }
+            
+            // 计算时间范围
+            const timeRange = posts[posts.length - 1].time - posts[0].time;
+            const timeScale = (height - 2 * margin) / timeRange;
+            
+            // 计算主题位置
+            const topicIds = Array.from(topics.keys());
+            const topicScale = (width - 2 * margin) / Math.max(topicIds.length, 1);
+            
+            // 绘制节点和连接
+            const topicPositions = new Map();
+            const platformChanges = new Set();
+            
+            // 添加时间方向箭头
+            const timeArrow = document.createElement('div');
+            timeArrow.className = 'time-arrow';
+            timeArrow.innerHTML = '⬆️ 时间';
+            treeDiv.appendChild(timeArrow);
+            
+            posts.forEach((post, index) => {
+                const x = margin + (topicIds.indexOf(post.topicId) * topicScale);
+                // 使用索引而不是时间来计算Y位置，确保间隔一致
+                const y = height - margin - (index * (height - 2 * margin) / (posts.length - 1));
+                
+                // 创建节点
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                
+                // 根据热度调整节点大小
+                const heat = heatMap.get(post.id) || 1;
+                const size = 6 + Math.min(heat * 2, 8); // 基础大小6px，热度增加最多8px
+                node.style.width = size + 'px';
+                node.style.height = size + 'px';
+                
+                node.style.left = (x - size/2) + 'px';
+                node.style.top = (y - size/2) + 'px';
+                node.style.backgroundColor = getPlatformColor(post.platform);
+                node.title = `${post.platform}: ${post.id} (热度: ${heat})`;
+                
+                // 添加悬停效果
+                node.addEventListener('mouseover', (e) => {
+                    showTreeTooltip(e, post);
+                });
+                
+                node.addEventListener('mouseout', () => {
+                    hideTreeTooltip();
+                });
+                
+                treeDiv.appendChild(node);
+                
+                // 记录主题位置
+                if (!topicPositions.has(post.topicId)) {
+                    topicPositions.set(post.topicId, { x, y });
+                }
+                
+                // 绘制连接线（如果不是第一个帖子）
+                if (index > 0) {
+                    const prevPost = posts[index - 1];
+                    const prevX = margin + (topicIds.indexOf(prevPost.topicId) * topicScale);
+                    const prevY = height - margin - ((index - 1) * (height - 2 * margin) / (posts.length - 1));
+                    
+                    // 如果主题相同，绘制垂直线
+                    if (post.topicId === prevPost.topicId) {
+                        const link = document.createElement('div');
+                        link.className = 'tree-link';
+                        link.style.left = x + 'px';
+                        link.style.top = prevY + 'px';
+                        link.style.width = '1px';
+                        link.style.height = (y - prevY) + 'px';
+                        treeDiv.appendChild(link);
+                    } else {
+                        // 如果主题不同，绘制斜线
+                        const link = document.createElement('div');
+                        link.className = 'tree-link';
+                        link.style.left = prevX + 'px';
+                        link.style.top = prevY + 'px';
+                        
+                        const length = Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2));
+                        const angle = Math.atan2(y - prevY, x - prevX) * 180 / Math.PI;
+                        
+                        link.style.width = length + 'px';
+                        link.style.transform = `rotate(${angle}deg)`;
+                        treeDiv.appendChild(link);
+                        
+                        // 标记平台转换
+                        platformChanges.add(post.id);
+                    }
+                }
+                
+
+            });
+        }
+        
+        // 显示演化树工具提示
+        function showTreeTooltip(event, post) {
+            treeTooltip.style.opacity = '1';
+            treeTooltip.style.left = (event.pageX + 10) + 'px';
+            treeTooltip.style.top = (event.pageY - 10) + 'px';
+            
+            const heat = evolutionData.heatMap.get(post.id) || 1;
+            
+            treeTooltip.innerHTML = `
+                <strong>${post.platform}</strong><br>
+                帖文ID: ${post.id}<br>
+                时间: ${post.time.toLocaleString()}<br>
+                主题: ${post.topicId}<br>
+                热度: ${heat}
+            `;
+        }
+        
+        // 隐藏演化树工具提示
+        function hideTreeTooltip() {
+            treeTooltip.style.opacity = '0';
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化事件监听器
+            document.getElementById('weight-slider').addEventListener('input', function() {
+                weightThreshold = parseFloat(this.value);
+                document.getElementById('weight-value').textContent = weightThreshold.toFixed(2);
+                applyFilters();
+            });
+            
+            document.getElementById('show-users').addEventListener('change', function() {
+                showUsers = this.checked;
+                applyFilters();
+            });
+            
+            document.getElementById('show-posts').addEventListener('change', function() {
+                showPosts = this.checked;
+                applyFilters();
+            });
+            
+            document.getElementById('show-platforms').addEventListener('change', function() {
+                showPlatforms = this.checked;
+                applyFilters();
+            });
+            
+            document.getElementById('show-labels').addEventListener('change', function() {
+                showLabels = this.checked;
+                updateVisualization();
+            });
+            
+            document.getElementById('show-weights').addEventListener('change', function() {
+                showWeights = this.checked;
+                updateVisualization();
+            });
+            
+            // 加载数据
+            loadData();
+        });
+    </script>
+</body>
+</html> 
