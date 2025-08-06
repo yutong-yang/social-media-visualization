@@ -91,33 +91,37 @@
 
         
         .legend {
-            margin-top: 15px;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
             font-size: 12px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .legend-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .legend-color {
             display: inline-block;
-            width: 15px;
-            height: 15px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 8px;
+            border: 1px solid #ccc;
         }
         
         .legend-line {
             display: inline-block;
-            width: 20px;
-            height: 2px;
-            margin-right: 5px;
+            margin-right: 8px;
+            border-radius: 1px;
         }
         
         #network-container {
@@ -400,39 +404,99 @@
                 <div id="evolution-tree-container" style="flex: 1; height: 600px; border: 0px solid #ddd; border-radius: 5px; position: relative;">
                     <div class="loading">加载演化树...</div>
                 </div>
-                <div id="topic-legend" style="height: 30px; display: flex; align-items: center; justify-content: center; gap: 15px; background: #f0f0f0; border: 1px solid #ddd; border-top: none; font-size: 11px;">
+                <div id="topic-legend" style="height: 40px; position: relative; background: #f0f0f0; border: 1px solid #ddd; border-top: none; font-size: 11px; padding: 5px;">
                     <!-- 话题图例将通过JavaScript动态生成 -->
-                </div>
-                <div id="platform-legend" style="height: 50px; display: flex; align-items: center; justify-content: center; gap: 20px; background: #f8f9fa; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px;">
-                    <!-- 平台图例将通过JavaScript动态生成 -->
                 </div>
             </div>
         </div>
         
         <div class="legend">
-            <div class="legend-item">
-                <span class="legend-color" style="background: #ff6b6b;"></span>
-                用户节点
+            <!-- 节点类型图例 -->
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">节点类型</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #ff6b6b; width: 10px; height: 10px;"></span>
+                        用户节点 (小)
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #4ecdc4; width: 8px; height: 8px;"></span>
+                        帖文节点 (小)
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #45b7d1; width: 20px; height: 20px;"></span>
+                        平台节点 (大)
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #4ecdc4;"></span>
-                帖文节点
+            
+            <!-- 平台颜色图例 -->
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">平台颜色</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #4A90E2; width: 15px; height: 15px;"></span>
+                        微博
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #C3AB32; width: 15px; height: 15px;"></span>
+                        网易新闻
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #AC6158; width: 15px; height: 15px;"></span>
+                        抖音
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #AD748C; width: 15px; height: 15px;"></span>
+                        今日头条
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #3E5555; width: 15px; height: 15px;"></span>
+                        小红书
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #E17D66; width: 15px; height: 15px;"></span>
+                        微信
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <span class="legend-color" style="background: #45b7d1;"></span>
-                平台节点
+            
+            <!-- 边类型图例 -->
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">关系类型</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #ff6b6b; width: 20px; height: 2px;"></span>
+                        用户-帖文关系
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #45b7d1; width: 20px; height: 2px;"></span>
+                        帖文-平台关系
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #96ceb4; width: 20px; height: 2px;"></span>
+                        传播关系
+                    </div>
+                </div>
             </div>
-            <div class="legend-item">
-                <span class="legend-line" style="background: #ff6b6b;"></span>
-                用户-帖文关系
-            </div>
-            <div class="legend-item">
-                <span class="legend-line" style="background: #45b7d1;"></span>
-                帖文-平台关系
-            </div>
-            <div class="legend-item">
-                <span class="legend-line" style="background: #96ceb4;"></span>
-                传播关系
+            
+            <!-- 传播强度图例 -->
+            <div style="margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">传播强度</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #96ceb4; width: 15px; height: 1px;"></span>
+                        弱传播
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #96ceb4; width: 15px; height: 3px;"></span>
+                        中等传播
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line" style="background: #96ceb4; width: 15px; height: 6px;"></span>
+                        强传播
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -516,8 +580,7 @@
                 // 生成话题图例
                 generateTopicLegend(evolutionData);
                 
-                // 生成平台图例
-                generatePlatformLegend();
+
                 
                 // 加载网络数据
                 const response = await fetch('./data/4-1data/edge_data_complete.json');
@@ -623,12 +686,21 @@
                             }
                             
                             // 添加边
+                            let linkColor = getLinkColor(type);
+                            
+                            // 如果是贴文-平台关系，使用平台颜色
+                            if (type === 'post-platform') {
+                                const platformId = target; // 目标节点是平台
+                                const platformName = extractPlatformFromPlatformId(platformId);
+                                linkColor = getPlatformColorForEvolution(platformName);
+                            }
+                            
                             links.push({
                                 source: source,
                                 target: target,
                                 type: type,
                                 weight: weight,
-                                color: getLinkColor(type),
+                                color: linkColor,
                                 width: getLinkWidth(type, weight)
                             });
                         }
@@ -824,18 +896,18 @@
                 .attr('stroke', d => {
                     // 为平台节点添加特殊边框
                     if (d.type === 'platform') {
-                        if (d.id === 'P_5' || d.id === '微信') {
-                            return '#FF6B35'; // 微信橙色边框
-                        } else if (d.id === 'P_3' || d.id === '今日头条') {
-                            return '#AD748C'; // 今日头条紫色边框
-                        } else if (d.id === 'P_0' || d.id === '微博') {
+                        if (d.id === 'P_5' || d.id === '微博') {
                             return '#4A90E2'; // 微博蓝色边框
-                        } else if (d.id === 'P_2' || d.id === '抖音') {
-                            return '#AC6158'; // 抖音红色边框
-                        } else if (d.id === 'P_4' || d.id === '小红书') {
-                            return '#3E5555'; // 小红书深绿色边框
                         } else if (d.id === 'P_1' || d.id === '网易新闻') {
                             return '#C3AB32'; // 网易新闻黄色边框
+                        } else if (d.id === 'P_0' || d.id === '抖音') {
+                            return '#AC6158'; // 抖音红色边框
+                        } else if (d.id === 'P_2' || d.id === '今日头条') {
+                            return '#AD748C'; // 今日头条紫色边框
+                        } else if (d.id === 'P_4' || d.id === '小红书') {
+                            return '#3E5555'; // 小红书深绿色边框
+                        } else if (d.id === 'P_3' || d.id === '微信') {
+                            return '#E17D66'; // 微信橙色边框
                         }
                         return '#333'; // 其他平台黑色边框
                     }
@@ -926,6 +998,9 @@
             // 更新信息面板
             updateNetworkInfo();
             updatePerformanceInfo();
+            
+            // 更新动态图例
+            updateDynamicLegend();
         }
         
         // 获取节点类型
@@ -956,33 +1031,67 @@
             // 如果是平台节点，按平台颜色编码
             if (type === 'platform') {
                 const platform = extractPlatformFromPlatformId(id);
-                return getPlatformColor(platform);
+                return getPlatformColorForEvolution(platform);
+            }
+            
+            // 如果是贴文节点，根据平台ID使用平台颜色
+            if (type === 'post') {
+                // 从贴文ID中提取平台信息
+                const platformId = extractPlatformFromPostId(id);
+                console.log('贴文节点颜色设置:', id, '-> platformId:', platformId);
+                if (platformId) {
+                    const color = getPlatformColor(platformId);
+                    console.log('贴文节点最终颜色:', id, '->', color);
+                    return color;
+                }
+                return '#4ecdc4'; // 默认颜色
             }
             
             // 其他节点类型保持原色
             switch (type) {
                 case 'user': return '#ff6b6b';
-                case 'post': return '#4ecdc4';
                 default: return '#95a5a6';
             }
+        }
+        
+        // 从贴文ID提取平台ID
+        function extractPlatformFromPostId(postId) {
+            // 贴文ID格式通常是: 平台代码_时间戳_序号
+            // 例如: DY_202412071736_8, WYXW_202412121506_12
+            const parts = postId.split('_');
+            if (parts.length >= 1) {
+                const platformCode = parts[0];
+                // 将平台代码映射到平台ID
+                const platformMapping = {
+                    'DY': 'P_0',    // 抖音
+                    'WYXW': 'P_1',  // 网易新闻
+                    'JRTT': 'P_2',  // 今日头条
+                    'VX': 'P_3',    // 微信
+                    'XHS': 'P_4',   // 小红书
+                    'WB': 'P_5'     // 微博
+                };
+                console.log('platformMapping[platformCode]',platformMapping[platformCode]);
+                return platformMapping[platformCode] || null;
+            }
+            return null;
         }
         
         // 从平台ID提取平台信息
         function extractPlatformFromPlatformId(id) {
             // 平台ID映射关系（支持P_格式和简短代号）
             const platformMapping = {
-                'P_0': '微博',    // 微博
-                'P_1': '网易新闻',  // 网易新闻
-                'P_2': '抖音',    // 抖音
-                'P_3': '今日头条',  // 今日头条
-                'P_4': '小红书',   // 小红书
-                'P_5': '微信',    // 微信
-                'WB': '微博',     // 微博
-                'WYXW': '网易新闻', // 网易新闻
-                'DY': '抖音',     // 抖音
-                'JRTT': '今日头条', // 今日头条
-                'XHS': '小红书',   // 小红书
-                'VX': '微信'      // 微信
+                'P_0': '抖音',  
+                'P_1': '网易新闻', 
+                'P_2': '今日头条',  
+                'P_3': '微信',  
+                'P_4': '小红书', 
+                'P_5': '微博',   
+                'WB': '微博',   
+                'WYXW': '网易新闻',
+                'DY': '抖音',   
+                'JRTT': '今日头条',
+                'XHS': '小红书', 
+                'VX': '微信'   
             };
             
             return platformMapping[id] || '未知平台';
@@ -1019,7 +1128,7 @@
         function getLinkColor(type) {
             switch (type) {
                 case 'user-post': return '#ff6b6b';
-                case 'post-platform': return '#45b7d1';
+                case 'post-platform': return '#45b7d1'; // 贴文-平台关系使用平台颜色
                 case 'post-spread': return '#96ceb4';
                 default: return '#999';
             }
@@ -1328,7 +1437,7 @@
                         name: platformId,
                         shortName: platformId,
                         type: 'platform',
-                        color: getPlatformColor(platformId),
+                        color: getPlatformColorForEvolution(platformId),
                         size: 10,
                         count: 0,
                         members: []
@@ -1571,14 +1680,24 @@
         // 获取平台颜色
         function getPlatformColor(platformId) {
             const platformColors = {
-                'JRTT': '#ff6b6b',
-                'VX': '#4ecdc4',
-                'WB': '#45b7d1',
-                'DY': '#96ceb4',
-                'XHS': '#feca57',
-                'WYXW': '#ff9ff3'
+                'P_5': '#4A90E2', // 微博蓝色
+                'P_1': '#C3AB32', // 网易新闻黄色
+                'P_0': '#AC6158', // 抖音红色
+                'P_2': '#AD748C', // 今日头条紫色
+                'P_4': '#3E5555', // 小红书深绿色
+                'P_3': '#E17D66', // 微信橙色
+                '微博': '#4A90E2',
+                '微信': '#E17D66',
+                '抖音': '#AC6158',
+                '今日头条': '#AD748C',
+                '小红书': '#3E5555',
+                '网易新闻': '#C3AB32'
             };
-            return platformColors[platformId] || '#808080';
+            console.log('getPlatformColor 输入:', platformId);
+            console.log('platformColors[platformId]:', platformColors[platformId]);
+            const result = platformColors[platformId] || '#808080';
+            console.log('getPlatformColor 输出:', result);
+            return result;
         }
         
         // 切换路径过滤
@@ -1934,8 +2053,8 @@
             return heatMap;
         }
         
-        // 获取平台颜色
-        function getPlatformColor(platform) {
+        // 获取平台颜色（用于演化树）
+        function getPlatformColorForEvolution(platform) {
             const colors = {
                 'DY': '#AC6158',    // 抖音
                 'XHS': '#3E5555',   // 小红书
@@ -1956,24 +2075,42 @@
         // 生成话题图例
         function generateTopicLegend(evolutionData) {
             const legendContainer = document.getElementById('topic-legend');
+            const treeContainer = document.getElementById('evolution-tree-container');
+            // 使用与演化树相同的排序方式
             const topics = Array.from(evolutionData.topics.keys()).sort((a, b) => a - b);
             
             legendContainer.innerHTML = '';
             
-            topics.forEach(topicId => {
+            // 使用与演化树完全相同的计算方式
+            const topicIds = topics;
+            // 使用演化树容器的宽度，确保完全对应
+            const width = treeContainer.clientWidth;
+            const margin = 20;
+            const topicScale = (width - 2 * margin) / Math.max(topicIds.length, 1);
+            
+            topics.forEach((topicId) => {
                 const legendItem = document.createElement('div');
                 legendItem.style.display = 'flex';
                 legendItem.style.alignItems = 'center';
-                legendItem.style.gap = '5px';
+                legendItem.style.gap = '3px';
+                legendItem.style.position = 'absolute';
+                legendItem.style.top = '50%';
+                legendItem.style.transform = 'translateY(-50%)';
+                // 使用与演化树完全相同的x坐标计算方式
+                const x = margin + (topicIds.indexOf(topicId) * topicScale);
+                legendItem.style.left = x + 'px';
                 
                 const topicDot = document.createElement('div');
-                topicDot.style.width = '8px';
-                topicDot.style.height = '8px';
+                topicDot.style.width = '6px';
+                topicDot.style.height = '6px';
                 topicDot.style.borderRadius = '50%';
                 topicDot.style.backgroundColor = '#666';
+                topicDot.style.border = '1px solid #999';
                 
                 const label = document.createElement('span');
-                label.textContent = `话题${topicId}`;
+                label.textContent = `${topicId}`;
+                label.style.fontSize = '9px';
+                label.style.color = '#666';
                 
                 legendItem.appendChild(topicDot);
                 legendItem.appendChild(label);
@@ -1981,41 +2118,7 @@
             });
         }
         
-        // 生成平台图例
-        function generatePlatformLegend() {
-            const legendContainer = document.getElementById('platform-legend');
-            const platforms = [
-                { id: 'P_0', name: '微博', color: '#4A90E2', fullName: '微博'},
-                { id: 'P_1', name: '网易新闻', color: '#C3AB32', fullName: '网易新闻'},
-                { id: 'P_2', name: '抖音', color: '#AC6158', fullName: '抖音'},
-                { id: 'P_3', name: '今日头条', color: '#AD748C', fullName: '今日头条'},
-                { id: 'P_4', name: '小红书', color: '#3E5555', fullName: '小红书'},
-                { id: 'P_5', name: '微信', color: '#E17D66', fullName: '微信'}
-            ];
-            
-            legendContainer.innerHTML = '';
-            
-            platforms.forEach(platform => {
-                const legendItem = document.createElement('div');
-                legendItem.style.display = 'flex';
-                legendItem.style.alignItems = 'center';
-                legendItem.style.gap = '5px';
-                legendItem.style.fontSize = '12px';
-                
-                const colorDot = document.createElement('div');
-                colorDot.style.width = '12px';
-                colorDot.style.height = '12px';
-                colorDot.style.borderRadius = '50%';
-                colorDot.style.backgroundColor = platform.color;
-                
-                const label = document.createElement('span');
-                label.textContent = `${platform.name}`;
-                
-                legendItem.appendChild(colorDot);
-                legendItem.appendChild(label);
-                legendContainer.appendChild(legendItem);
-            });
-        }
+
         
         // 绘制演化树
         function drawEvolutionTree(evolutionData) {
@@ -2072,7 +2175,7 @@
                 
                 node.style.left = (x - size/2) + 'px';
                 node.style.top = (y - size/2) + 'px';
-                node.style.backgroundColor = getPlatformColor(post.platform);
+                node.style.backgroundColor = getPlatformColorForEvolution(post.platform);
                 node.title = `${post.platform}: ${post.id} (热度: ${heat})`;
                 
                 // 添加悬停效果
@@ -2149,6 +2252,118 @@
         // 隐藏演化树工具提示
         function hideTreeTooltip() {
             treeTooltip.style.opacity = '0';
+        }
+        
+        // 更新动态图例
+        function updateDynamicLegend() {
+            // 统计当前显示的节点类型
+            const nodeTypeCounts = {
+                user: filteredNodes.filter(n => n.type === 'user').length,
+                post: filteredNodes.filter(n => n.type === 'post').length,
+                platform: filteredNodes.filter(n => n.type === 'platform').length
+            };
+            
+            // 统计当前显示的边类型
+            const linkTypeCounts = {
+                'user-post': filteredLinks.filter(l => l.type === 'user-post').length,
+                'post-platform': filteredLinks.filter(l => l.type === 'post-platform').length,
+                'post-spread': filteredLinks.filter(l => l.type === 'post-spread').length
+            };
+            
+            // 统计平台分布
+            const platformCounts = {};
+            filteredNodes.filter(n => n.type === 'platform').forEach(node => {
+                const platformName = extractPlatformFromPlatformId(node.id);
+                platformCounts[platformName] = (platformCounts[platformName] || 0) + 1;
+            });
+            
+            // 更新图例中的计数信息
+            updateLegendCounts(nodeTypeCounts, linkTypeCounts, platformCounts);
+        }
+        
+        // 更新图例计数
+        function updateLegendCounts(nodeCounts, linkCounts, platformCounts) {
+            // 更新节点类型图例
+            const nodeLegendItems = document.querySelectorAll('.legend-item');
+            nodeLegendItems.forEach(item => {
+                const text = item.textContent;
+                if (text.includes('用户节点')) {
+                    const count = nodeCounts.user || 0;
+                    item.innerHTML = item.innerHTML.replace(/用户节点.*/, `用户节点 (小) - ${count}个`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightNodeType('user');
+                } else if (text.includes('帖文节点')) {
+                    const count = nodeCounts.post || 0;
+                    item.innerHTML = item.innerHTML.replace(/帖文节点.*/, `帖文节点 (中) - ${count}个`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightNodeType('post');
+                } else if (text.includes('平台节点')) {
+                    const count = nodeCounts.platform || 0;
+                    item.innerHTML = item.innerHTML.replace(/平台节点.*/, `平台节点 (大) - ${count}个`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightNodeType('platform');
+                }
+            });
+            
+            // 更新边类型图例
+            const linkLegendItems = document.querySelectorAll('.legend-item');
+            linkLegendItems.forEach(item => {
+                const text = item.textContent;
+                if (text.includes('用户-帖文关系')) {
+                    const count = linkCounts['user-post'] || 0;
+                    item.innerHTML = item.innerHTML.replace(/用户-帖文关系.*/, `用户-帖文关系 - ${count}条`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightLinkType('user-post');
+                } else if (text.includes('帖文-平台关系')) {
+                    const count = linkCounts['post-platform'] || 0;
+                    item.innerHTML = item.innerHTML.replace(/帖文-平台关系.*/, `帖文-平台关系 - ${count}条`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightLinkType('post-platform');
+                } else if (text.includes('传播关系')) {
+                    const count = linkCounts['post-spread'] || 0;
+                    item.innerHTML = item.innerHTML.replace(/传播关系.*/, `传播关系 - ${count}条`);
+                    // 添加点击事件
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => highlightLinkType('post-spread');
+                }
+            });
+        }
+        
+        // 高亮节点类型
+        function highlightNodeType(nodeType) {
+            // 重置所有节点
+            svg.selectAll('circle').attr('opacity', 0.3);
+            
+            // 高亮指定类型的节点
+            svg.selectAll('circle').filter(d => d.type === nodeType)
+                .attr('opacity', 1)
+                .attr('r', d => d.size * 1.5);
+            
+            // 3秒后恢复
+            setTimeout(() => {
+                svg.selectAll('circle').attr('opacity', 1).attr('r', d => d.size);
+            }, 3000);
+        }
+        
+        // 高亮边类型
+        function highlightLinkType(linkType) {
+            // 重置所有边
+            svg.selectAll('line').attr('opacity', 0.1);
+            
+            // 高亮指定类型的边
+            svg.selectAll('line').filter(d => d.type === linkType)
+                .attr('opacity', 0.8)
+                .attr('stroke-width', d => d.width * 2);
+            
+            // 3秒后恢复
+            setTimeout(() => {
+                svg.selectAll('line').attr('opacity', 0.6).attr('stroke-width', d => d.width);
+            }, 3000);
         }
         
         // 页面加载完成后初始化
