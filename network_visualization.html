@@ -884,7 +884,17 @@
                 .enter().append('line')
                 .attr('stroke', d => d.color)
                 .attr('stroke-width', d => d.width)
-                .attr('opacity', 0.6);
+                .attr('opacity', d => {
+                    // 根据边类型设置不同的透明度
+                    if (d.type === 'post-spread') {
+                        return 0.2; // 传播关系更透明
+                    } else if (d.type === 'user-post') {
+                        return 0.7; // 用户-帖文关系稍透明
+                    } else if (d.type === 'post-platform') {
+                        return 0.8; // 帖文-平台关系较清晰
+                    }
+                    return 0.6; // 默认透明度
+                });
             
             // 绘制节点
             const node = g.append('g')
@@ -1214,7 +1224,7 @@
             svg.selectAll('line').attr('opacity', 0.1);
             svg.selectAll('line').filter(d => 
                 d.source.id === selectedNode.id || d.target.id === selectedNode.id
-            ).attr('opacity', 0.8);
+            ).attr('opacity', 0.9);
             
             // 显示节点信息
             console.log('高亮节点:', selectedNode);
@@ -2108,7 +2118,7 @@
                 topicDot.style.border = '1px solid #999';
                 
                 const label = document.createElement('span');
-                label.textContent = `${topicId}`;
+                label.textContent = `话题${topicId}`;
                 label.style.fontSize = '9px';
                 label.style.color = '#666';
                 
@@ -2289,19 +2299,19 @@
                 const text = item.textContent;
                 if (text.includes('用户节点')) {
                     const count = nodeCounts.user || 0;
-                    item.innerHTML = item.innerHTML.replace(/用户节点.*/, `用户节点 (小) - ${count}个`);
+                    item.innerHTML = item.innerHTML.replace(/用户节点.*/, `用户节点 (小)`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightNodeType('user');
                 } else if (text.includes('帖文节点')) {
                     const count = nodeCounts.post || 0;
-                    item.innerHTML = item.innerHTML.replace(/帖文节点.*/, `帖文节点 (中) - ${count}个`);
+                    item.innerHTML = item.innerHTML.replace(/帖文节点.*/, `帖文节点 (小)`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightNodeType('post');
                 } else if (text.includes('平台节点')) {
                     const count = nodeCounts.platform || 0;
-                    item.innerHTML = item.innerHTML.replace(/平台节点.*/, `平台节点 (大) - ${count}个`);
+                    item.innerHTML = item.innerHTML.replace(/平台节点.*/, `平台节点 (大)`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightNodeType('platform');
@@ -2314,19 +2324,19 @@
                 const text = item.textContent;
                 if (text.includes('用户-帖文关系')) {
                     const count = linkCounts['user-post'] || 0;
-                    item.innerHTML = item.innerHTML.replace(/用户-帖文关系.*/, `用户-帖文关系 - ${count}条`);
+                    item.innerHTML = item.innerHTML.replace(/用户-帖文关系.*/, `用户-帖文关系`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightLinkType('user-post');
                 } else if (text.includes('帖文-平台关系')) {
                     const count = linkCounts['post-platform'] || 0;
-                    item.innerHTML = item.innerHTML.replace(/帖文-平台关系.*/, `帖文-平台关系 - ${count}条`);
+                    item.innerHTML = item.innerHTML.replace(/帖文-平台关系.*/, `帖文-平台关系`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightLinkType('post-platform');
                 } else if (text.includes('传播关系')) {
                     const count = linkCounts['post-spread'] || 0;
-                    item.innerHTML = item.innerHTML.replace(/传播关系.*/, `传播关系 - ${count}条`);
+                    item.innerHTML = item.innerHTML.replace(/传播关系.*/, `传播关系`);
                     // 添加点击事件
                     item.style.cursor = 'pointer';
                     item.onclick = () => highlightLinkType('post-spread');
@@ -2362,7 +2372,17 @@
             
             // 3秒后恢复
             setTimeout(() => {
-                svg.selectAll('line').attr('opacity', 0.6).attr('stroke-width', d => d.width);
+                svg.selectAll('line').attr('opacity', d => {
+                    // 根据边类型设置不同的透明度
+                    if (d.type === 'post-spread') {
+                        return 0.3; // 传播关系更透明
+                    } else if (d.type === 'user-post') {
+                        return 0.7; // 用户-帖文关系稍透明
+                    } else if (d.type === 'post-platform') {
+                        return 0.8; // 帖文-平台关系较清晰
+                    }
+                    return 0.6; // 默认透明度
+                }).attr('stroke-width', d => d.width);
             }, 3000);
         }
         
